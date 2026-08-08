@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>クレセントアイル：北征編 マジックポット出現時間計算機</title>
+<style>
+:root{
+  color-scheme: dark;
+  --bg:#0f1020;
+  --panel:rgba(28,27,52,.78);
+  --panel2:rgba(48,43,78,.72);
+  --text:#fff9ff;
+  --muted:#c9c1da;
+  --east:#75ddff;
+  --east-soft:#b9f0ff;
+  --west:#ffc48d;
+  --west-soft:#ffe1bf;
+  --accent:#e9a8ff;
+  --accent2:#9fc4ff;
+  --accent3:#ffd7f1;
+  --danger:#ff9aa7;
+  --line:rgba(255,255,255,.10);
+  --shadow:0 24px 70px rgba(4,4,18,.45);
+}
+*{box-sizing:border-box}
+html{min-height:100%;background:var(--bg)}
+body{
+  margin:0;
+  color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+  background:
+    radial-gradient(circle at 15% 5%, rgba(174,139,255,.24), transparent 32%),
+    radial-gradient(circle at 88% 18%, rgba(93,198,255,.17), transparent 27%),
+    radial-gradient(circle at 50% 100%, rgba(255,154,210,.12), transparent 34%),
+    linear-gradient(180deg,#15142d 0%,#101224 46%,#0b0d18 100%);
+}
+body::before,
+body::after{
+  content:"";
+  position:fixed;
+  pointer-events:none;
+  inset:0;
+  z-index:0;
+}
+body::before{
+  opacity:.48;
+  background-image:
+    radial-gradient(circle,rgba(255,255,255,.8) 0 1px,transparent 1.5px),
+    radial-gradient(circle,rgba(255,255,255,.5) 0 1px,transparent 1.5px),
+    radial-gradient(circle,rgba(255,255,255,.38) 0 1px,transparent 1.5px);
+  background-size:120px 120px,190px 190px,260px 260px;
+  background-position:18px 22px,82px 116px,140px 42px;
+  mask-image:linear-gradient(to bottom,#000 0%,rgba(0,0,0,.55) 46%,transparent 88%);
+}
+body::after{
+  width:440px;
+  height:440px;
+  left:auto;
+  right:-190px;
+  top:-210px;
+  border-radius:50%;
+  background:radial-gradient(circle at 38% 62%,rgba(255,255,255,.14),rgba(198,184,255,.10) 44%,transparent 72%);
+  filter:blur(1px);
+}
+main{
+  position:relative;
+  z-index:1;
+  width:min(780px,calc(100% - 28px));
+  margin:0 auto;
+  padding:48px 0 52px;
+}
+.hero{
+  text-align:center;
+  margin-bottom:26px;
+  position:relative;
+}
+.hero-mark{
+  width:54px;
+  height:54px;
+  margin:0 auto 14px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  color:#2c2040;
+  font-size:24px;
+  font-weight:900;
+  background:linear-gradient(145deg,#fff8d8,#ffc8f1 52%,#b6cfff);
+  box-shadow:0 0 0 5px rgba(255,255,255,.05),0 8px 30px rgba(216,165,255,.25);
+}
+h1{
+  font-size:clamp(24px,5vw,36px);
+  letter-spacing:.02em;
+  line-height:1.3;
+  margin:0 0 10px;
+  text-shadow:0 2px 18px rgba(218,181,255,.20);
+}
+.lead{
+  max-width:700px;
+  color:var(--muted);
+  margin:0 auto;
+  line-height:1.85;
+  font-size:14px;
+}
+.card{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(155deg,rgba(36,33,66,.86),rgba(22,23,43,.84));
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:26px;
+  padding:24px;
+  box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+.card::before{
+  content:"";
+  position:absolute;
+  width:220px;
+  height:220px;
+  border-radius:50%;
+  right:-110px;
+  top:-135px;
+  background:radial-gradient(circle,rgba(236,164,255,.22),transparent 68%);
+  pointer-events:none;
+}
+.input-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:12px;
+  align-items:end;
+  position:relative;
+}
+.field label{
+  display:block;
+  font-size:13px;
+  font-weight:700;
+  color:#eee7f7;
+  margin:0 0 8px;
+  letter-spacing:.02em;
+}
+.remaining-wrap{position:relative}
+.remaining-wrap input{
+  width:100%;
+  height:60px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(8,10,24,.60);
+  color:white;
+  border-radius:17px;
+  padding:0 62px 0 18px;
+  font-size:27px;
+  font-weight:800;
+  outline:none;
+  transition:.2s ease;
+  box-shadow:inset 0 1px 10px rgba(0,0,0,.18);
+}
+.remaining-wrap input::placeholder{color:#76728b}
+.remaining-wrap input:focus{
+  border-color:rgba(224,166,255,.75);
+  box-shadow:0 0 0 4px rgba(222,166,255,.11),inset 0 1px 10px rgba(0,0,0,.16);
+  background:rgba(10,12,28,.78);
+}
+.suffix{
+  position:absolute;
+  right:18px;
+  top:50%;
+  transform:translateY(-50%);
+  color:var(--muted);
+  font-weight:800;
+}
+button{
+  height:60px;
+  border:0;
+  border-radius:17px;
+  padding:0 24px;
+  background:linear-gradient(135deg,#ffc7ee 0%,#d9afff 46%,#a5c7ff 100%);
+  color:#291f3a;
+  font-size:15px;
+  font-weight:900;
+  letter-spacing:.03em;
+  cursor:pointer;
+  box-shadow:0 10px 24px rgba(193,148,255,.22),inset 0 1px 0 rgba(255,255,255,.6);
+  transition:transform .15s ease,filter .15s ease,box-shadow .15s ease;
+}
+button:hover{filter:brightness(1.05);transform:translateY(-1px);box-shadow:0 13px 28px rgba(193,148,255,.27),inset 0 1px 0 rgba(255,255,255,.7)}
+button:active{transform:translateY(1px)}
+.note{
+  font-size:12px;
+  color:var(--muted);
+  margin:11px 2px 0;
+  line-height:1.65;
+}
+.error{color:var(--danger);min-height:1.4em;margin-top:10px;font-size:13px;font-weight:700}
+.results{display:none;margin-top:18px;animation:fadeUp .28s ease both}
+.results.show{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.summary{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin-bottom:14px;
+}
+.summary>div{
+  background:linear-gradient(145deg,rgba(66,57,96,.60),rgba(42,39,69,.56));
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;
+  padding:14px 15px;
+}
+.summary small{display:block;color:var(--muted);margin-bottom:5px;font-size:11px}
+.summary strong{font-size:19px;font-variant-numeric:tabular-nums}
+.next{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  background:
+    radial-gradient(circle at 90% 20%,rgba(171,205,255,.13),transparent 34%),
+    linear-gradient(135deg,rgba(59,48,90,.78),rgba(30,35,61,.82));
+  border-radius:20px;
+  padding:20px;
+  margin-bottom:16px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+.next::before{
+  content:"✦";
+  position:absolute;
+  right:16px;
+  top:10px;
+  color:rgba(255,255,255,.16);
+  font-size:30px;
+}
+.next-label{
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.08em;
+  color:#cfc6de;
+  margin-bottom:9px;
+}
+.next-main{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.direction{font-size:27px;font-weight:950;letter-spacing:.02em}
+.direction.east{color:var(--east-soft);text-shadow:0 0 20px rgba(117,221,255,.24)}
+.direction.west{color:var(--west-soft);text-shadow:0 0 20px rgba(255,196,141,.20)}
+.clock{text-align:right;min-width:110px}
+.clock .time{font-size:32px;font-weight:950;letter-spacing:.03em;font-variant-numeric:tabular-nums}
+.clock .delta{font-size:12px;color:var(--muted);margin-top:3px}
+.schedule-title{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  font-weight:900;
+  margin:20px 0 10px;
+  font-size:14px;
+}
+.schedule-title::before{
+  content:"";
+  width:4px;
+  height:16px;
+  border-radius:999px;
+  background:linear-gradient(var(--accent3),var(--accent2));
+  box-shadow:0 0 12px rgba(228,172,255,.28);
+}
+.schedule{display:grid;gap:9px}
+.row{
+  display:grid;
+  grid-template-columns:72px 1fr auto;
+  gap:12px;
+  align-items:center;
+  background:rgba(12,14,29,.58);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:15px;
+  padding:12px 14px;
+  transition:.16s ease;
+}
+.row:not(.past):hover{transform:translateX(2px);background:rgba(20,22,42,.72)}
+.badge{
+  width:46px;
+  min-height:34px;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  font-weight:950;
+  border:1px solid currentColor;
+  background:rgba(255,255,255,.035);
+}
+.badge.east{color:var(--east)}
+.badge.west{color:var(--west)}
+.row strong{font-size:14px}
+.row .elapsed{color:var(--muted);font-size:11px;margin-top:2px}
+.row .at{font-weight:900;font-size:16px;font-variant-numeric:tabular-nums}
+.past{opacity:.38;filter:saturate(.75)}
+.now{
+  border-color:rgba(234,170,255,.72);
+  box-shadow:inset 0 0 0 1px rgba(234,170,255,.3),0 0 22px rgba(221,163,255,.08);
+  background:linear-gradient(135deg,rgba(71,51,92,.52),rgba(29,31,54,.70));
+}
+.now .at::after{content:"  出現中";color:#f3c3ff;font-size:10px}
+.legend{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  margin:13px 2px 0;
+  font-size:12px;
+  color:var(--muted)
+}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px;box-shadow:0 0 8px currentColor}
+.eastdot{background:var(--east);color:var(--east)}
+.westdot{background:var(--west);color:var(--west)}
+.foot{
+  margin:21px auto 0;
+  max-width:720px;
+  color:#a9a2ba;
+  font-size:12px;
+  line-height:1.8;
+  text-align:center;
+}
+@media(max-width:560px){
+  main{padding:32px 0 40px}
+  .hero-mark{width:48px;height:48px;font-size:21px;margin-bottom:12px}
+  .hero{margin-bottom:21px}
+  .lead{font-size:13px;text-align:left}
+  .card{padding:18px;border-radius:22px}
+  .input-row{grid-template-columns:1fr}
+  button{width:100%}
+  .summary{grid-template-columns:1fr 1fr}
+  .summary>div{padding:12px}
+  .summary strong{font-size:16px}
+  .next{padding:17px}
+  .next-main{align-items:flex-end}
+  .direction{font-size:23px}
+  .clock .time{font-size:28px}
+  .row{grid-template-columns:54px 1fr auto;padding:11px 12px;gap:9px}
+  .badge{width:40px;min-height:31px}
+  .row .at{font-size:15px}
+}
+@media(max-width:390px){
+  .next-main{display:grid;grid-template-columns:1fr}
+  .clock{text-align:left}
+  .summary{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<main>
+  <header class="hero">
+    <div class="hero-mark" aria-hidden="true">✦</div>
+    <h1>マジックポット 出現時間計算</h1>
+    <p class="lead">島の参加者一覧で確認した「一番残り時間が短い人」の残り時間を入力すると、マジックポットF.A.T.E.の東／西の出現時刻を逆算します。</p>
+  </header>
+
+  <section class="card">
+    <div class="input-row">
+      <div class="field">
+        <label for="remaining">一番短い残り時間</label>
+        <div class="remaining-wrap"><input id="remaining" type="number" min="0" max="180" step="1" inputmode="numeric" placeholder="例：160"><span class="suffix">分</span></div>
+      </div>
+      <button id="calc">計算する</button>
+    </div>
+    <div class="note">入力した瞬間を基準時刻として計算します。コンテンツ時間は180分です。</div>
+    <div id="error" class="error"></div>
+
+    <div id="results" class="results">
+      <div class="summary">
+        <div><small>島の経過時間</small><strong id="elapsedText">-</strong></div>
+        <div><small>推定 島作成時刻</small><strong id="createdText">-</strong></div>
+      </div>
+
+      <div id="nextCard" class="next">
+        <div class="next-label">次のマジックポット</div>
+        <div class="next-main">
+          <div id="nextDir" class="direction">-</div>
+          <div class="clock"><div id="nextTime" class="time">--:--</div><div id="nextDelta" class="delta">-</div></div>
+        </div>
+      </div>
+
+      <div class="schedule-title">この島の出現予定</div>
+      <div id="schedule" class="schedule"></div>
+      <div class="legend"><span><i class="dot eastdot"></i>東</span><span><i class="dot westdot"></i>西</span></div>
+    </div>
+  </section>
+
+  <p class="foot">出現サイクル：島作成20分後に東 → 30分後に西 → 30分後に東…を繰り返します。180分の島では、20 / 50 / 80 / 110 / 140 / 170分経過時点が対象です。</p>
+</main>
+<script>
+const spawns = [
+  {elapsed:20, dir:'東', cls:'east'},
+  {elapsed:50, dir:'西', cls:'west'},
+  {elapsed:80, dir:'東', cls:'east'},
+  {elapsed:110, dir:'西', cls:'west'},
+  {elapsed:140, dir:'東', cls:'east'},
+  {elapsed:170, dir:'西', cls:'west'},
+];
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2,'0');
+function clock(d){ return `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function deltaText(min){
+  if (Math.abs(min) < 0.75) return '現在時刻付近';
+  if (min > 0) return `あと約${Math.round(min)}分`;
+  return `約${Math.abs(Math.round(min))}分前`;
+}
+function calculate(){
+  const rem = Number($('#remaining').value);
+  $('#error').textContent='';
+  if ($('#remaining').value==='' || !Number.isFinite(rem) || rem < 0 || rem > 180){
+    $('#results').classList.remove('show');
+    $('#error').textContent='0〜180の範囲で残り時間を入力してください。';
+    return;
+  }
+  const now = new Date();
+  const elapsed = 180-rem;
+  const created = new Date(now.getTime()-elapsed*60000);
+  $('#elapsedText').textContent=`${elapsed}分`;
+  $('#createdText').textContent=clock(created);
+
+  const rows = spawns.map(s => ({...s, at:new Date(created.getTime()+s.elapsed*60000), diff:s.elapsed-elapsed}));
+  const current = rows.find(r => Math.abs(r.diff) < 0.75);
+  const next = current || rows.find(r => r.diff > 0.75);
+
+  if(next){
+    $('#nextDir').textContent=`${next.dir} に出現`;
+    $('#nextDir').className=`direction ${next.cls}`;
+    $('#nextTime').textContent=clock(next.at);
+    $('#nextDelta').textContent=current ? '出現中（入力時刻基準）' : deltaText(next.diff);
+    $('#nextCard').style.opacity='1';
+  }else{
+    $('#nextDir').textContent='この島では終了';
+    $('#nextDir').className='direction';
+    $('#nextTime').textContent='--:--';
+    $('#nextDelta').textContent='170分経過時の西が最終';
+    $('#nextCard').style.opacity='.65';
+  }
+
+  $('#schedule').innerHTML = rows.map(r => {
+    const state = Math.abs(r.diff)<0.75 ? 'now' : r.diff < 0 ? 'past' : '';
+    return `<div class="row ${state}"><div class="badge ${r.cls}">${r.dir}</div><div><strong>${r.elapsed}分後</strong><div class="elapsed">残り${180-r.elapsed}分</div></div><div class="at">${clock(r.at)}</div></div>`;
+  }).join('');
+  $('#results').classList.add('show');
+}
+$('#calc').addEventListener('click',calculate);
+$('#remaining').addEventListener('keydown',e=>{if(e.key==='Enter')calculate()});
+</script>
+</body>
+</html>
