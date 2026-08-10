@@ -186,6 +186,55 @@ button{
 }
 button:hover{filter:brightness(1.05);transform:translateY(-1px);box-shadow:0 13px 28px rgba(193,148,255,.27),inset 0 1px 0 rgba(255,255,255,.7)}
 button:active{transform:translateY(1px)}
+.alt-divider{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:20px 0 16px;
+  color:#bcb4cc;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+.alt-divider::before,.alt-divider::after{content:"";height:1px;flex:1;background:rgba(255,255,255,.09)}
+.event-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  gap:12px;
+  align-items:end;
+}
+.time-input{
+  width:100%;
+  height:60px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(8,10,24,.60);
+  color:white;
+  border-radius:17px;
+  padding:0 16px;
+  font-size:24px;
+  font-weight:800;
+  outline:none;
+  transition:.2s ease;
+  color-scheme:dark;
+}
+.time-input:focus{
+  border-color:rgba(224,166,255,.75);
+  box-shadow:0 0 0 4px rgba(222,166,255,.11);
+  background:rgba(10,12,28,.78);
+}
+.dir-toggle{display:flex;gap:8px;height:60px}
+.dir-btn{
+  min-width:66px;
+  padding:0 18px;
+  background:rgba(255,255,255,.055);
+  color:var(--muted);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:none;
+}
+.dir-btn:hover{box-shadow:none}
+.dir-btn.active.east{color:#173541;background:linear-gradient(135deg,#bdf2ff,#78dcff);border-color:transparent}
+.dir-btn.active.west{color:#49301c;background:linear-gradient(135deg,#ffe0bd,#ffc38a);border-color:transparent}
+.event-note{margin-top:10px}
 .note{
   font-size:12px;
   color:var(--muted);
@@ -321,6 +370,9 @@ button:active{transform:translateY(1px)}
   .lead{font-size:13px;text-align:left}
   .card{padding:18px;border-radius:22px}
   .input-row{grid-template-columns:1fr}
+  .event-row{grid-template-columns:1fr}
+  .dir-toggle{width:100%}
+  .dir-btn{flex:1}
   button{width:100%}
   .summary{grid-template-columns:1fr 1fr}
   .summary>div{padding:12px}
@@ -344,8 +396,8 @@ button:active{transform:translateY(1px)}
 <main>
   <header class="hero">
     <div class="hero-mark" aria-hidden="true">✦</div>
-    <h1>マジックポット 出現時間計算</h1>
-    <p class="lead">島の参加者一覧で確認した「一番残り時間が短い人」の残り時間を入力すると、マジックポットF.A.T.E.の東／西の出現時刻を逆算します。</p>
+    <h1>クレセントアイル：北征編<br>マジックポット 出現時間計算</h1>
+    <p class="lead">プレイヤーリストで確認した「一番残り時間が短い人」の残り時間を入力すると、マジックポットF.A.T.E.の東／西の出現時刻を逆算します。</p>
   </header>
 
   <section class="card">
@@ -357,6 +409,23 @@ button:active{transform:translateY(1px)}
       <button id="calc">計算する</button>
     </div>
     <div class="note">入力した瞬間を基準時刻として計算します。コンテンツ時間は180分です。</div>
+
+    <div class="alt-divider">または</div>
+    <div class="event-row">
+      <div class="field">
+        <label for="eventTime">マジックポットが発生した時間</label>
+        <input id="eventTime" class="time-input" type="time" step="60">
+      </div>
+      <div class="field">
+        <label>発生した場所</label>
+        <div class="dir-toggle" role="group" aria-label="発生した場所">
+          <button type="button" id="eventEast" class="dir-btn east">東</button>
+          <button type="button" id="eventWest" class="dir-btn west">西</button>
+        </div>
+      </div>
+      <button id="calcEvent" type="button">計算する</button>
+    </div>
+    <div class="note event-note">発生時刻から計算する場合は、そのF.A.T.E.を基準に30分ごとの東西サイクルを表示します。</div>
     <div id="error" class="error"></div>
 
     <div id="results" class="results">
@@ -379,69 +448,154 @@ button:active{transform:translateY(1px)}
     </div>
   </section>
 
-  <p class="foot">出現サイクル：島作成20分後に東 → 30分後に西 → 30分後に東…を繰り返します。</p>
+  <p class="foot">出現サイクル：島作成10分後に東 → 30分後に西 → 30分後に東…を繰り返します。</p>
   <p class="foot">©SQUARE ENIX</p>
 </main>
 <script>
 const spawns = [
-  {elapsed:20, dir:'東', cls:'east'},
-  {elapsed:50, dir:'西', cls:'west'},
-  {elapsed:80, dir:'東', cls:'east'},
-  {elapsed:110, dir:'西', cls:'west'},
-  {elapsed:140, dir:'東', cls:'east'},
-  {elapsed:170, dir:'西', cls:'west'},
-  {elapsed:200, dir:'東', cls:'east'},
-  {elapsed:230, dir:'西', cls:'west'},
-  {elapsed:260, dir:'東', cls:'east'},
+  {elapsed:10, dir:'東', cls:'east'},
+  {elapsed:40, dir:'西', cls:'west'},
+  {elapsed:70, dir:'東', cls:'east'},
+  {elapsed:100, dir:'西', cls:'west'},
+  {elapsed:130, dir:'東', cls:'east'},
+  {elapsed:160, dir:'西', cls:'west'},
+  {elapsed:190, dir:'東', cls:'east'},
+  {elapsed:220, dir:'西', cls:'west'},
+  {elapsed:250, dir:'東', cls:'east'},
 ];
 const $ = s => document.querySelector(s);
 const pad = n => String(n).padStart(2,'0');
+let timerId = null;
+let mode = null;
+let baseElapsedMinutes = null;
+let baseTimestamp = null;
+let createdTimestamp = null;
+let eventTimestamp = null;
+let eventDir = null;
+
 function clock(d){ return `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
-function deltaText(min){
-  if (Math.abs(min) < 0.75) return '現在時刻付近';
-  if (min > 0) return `あと約${Math.round(min)}分`;
-  return `約${Math.abs(Math.round(min))}分前`;
+function elapsedText(minutes){
+  const totalSeconds = Math.max(0, Math.floor(minutes * 60));
+  return `${Math.floor(totalSeconds / 60)}分 ${pad(totalSeconds % 60)}秒`;
 }
-function calculate(){
-  const rem = Number($('#remaining').value);
-  $('#error').textContent='';
-  if ($('#remaining').value==='' || !Number.isFinite(rem) || rem < 0 || rem > 180){
-    $('#results').classList.remove('show');
-    $('#error').textContent='0〜180の範囲で残り時間を入力してください。';
-    return;
+function deltaText(min){
+  const seconds = Math.round(min * 60);
+  if (Math.abs(seconds) <= 30) return '現在時刻付近';
+  if (seconds > 0) {
+    const m = Math.floor(seconds / 60), sec = seconds % 60;
+    return m > 0 ? `あと${m}分${pad(sec)}秒` : `あと${sec}秒`;
   }
-  const now = new Date();
-  const elapsed = 180-rem;
-  const created = new Date(now.getTime()-elapsed*60000);
-  $('#elapsedText').textContent=`${elapsed}分`;
-  $('#createdText').textContent=clock(created);
-
-  const rows = spawns.map(s => ({...s, at:new Date(created.getTime()+s.elapsed*60000), diff:s.elapsed-elapsed}));
-  const current = rows.find(r => Math.abs(r.diff) < 0.75);
-  const next = current || rows.find(r => r.diff > 0.75);
-
-  if(next){
-    $('#nextDir').textContent=`${next.dir} に出現`;
-    $('#nextDir').className=`direction ${next.cls}`;
-    $('#nextTime').textContent=clock(next.at);
-    $('#nextDelta').textContent=current ? '出現中（入力時刻基準）' : deltaText(next.diff);
-    $('#nextCard').style.opacity='1';
-  }else{
-    $('#nextDir').textContent='この島では終了';
-    $('#nextDir').className='direction';
-    $('#nextTime').textContent='--:--';
-    $('#nextDelta').textContent='表示している出現予定は260分経過時まで';
-    $('#nextCard').style.opacity='.65';
-  }
-
+  const abs = Math.abs(seconds), m = Math.floor(abs / 60), sec = abs % 60;
+  return m > 0 ? `${m}分${pad(sec)}秒前` : `${sec}秒前`;
+}
+function setTimer(){
+  if (timerId) clearInterval(timerId);
+  render();
+  timerId = setInterval(render, 1000);
+}
+function render(){
+  if (mode === 'remaining') renderRemaining();
+  if (mode === 'event') renderEvent();
+}
+function renderRemaining(){
+  const nowMs = Date.now();
+  const elapsed = baseElapsedMinutes + (nowMs - baseTimestamp) / 60000;
+  const created = new Date(createdTimestamp);
+  $('#elapsedText').textContent = elapsedText(elapsed);
+  $('#createdText').textContent = clock(created);
+  const rows = spawns.map(s => ({...s, at:new Date(createdTimestamp+s.elapsed*60000), diff:s.elapsed-elapsed}));
+  const current = rows.find(r => Math.abs(r.diff) <= 0.5);
+  const next = current || rows.find(r => r.diff > 0.5);
+  showNext(next,current);
   $('#schedule').innerHTML = rows.map(r => {
-    const state = Math.abs(r.diff)<0.75 ? 'now' : r.diff < 0 ? 'past' : '';
+    const state = Math.abs(r.diff)<=0.5?'now':r.diff<-.5?'past':'';
     return `<div class="row ${state}"><div class="badge ${r.cls}">${r.dir}</div><div><strong>${r.elapsed}分後</strong><div class="elapsed">残り${180-r.elapsed}分</div></div><div class="at">${clock(r.at)}</div></div>`;
   }).join('');
   $('#results').classList.add('show');
 }
+function renderEvent(){
+  const nowMs = Date.now();
+  const since = (nowMs-eventTimestamp)/60000;
+  $('#elapsedText').textContent = `基準から ${elapsedText(since)}`;
+  $('#createdText').textContent = '発生時刻基準';
+
+  const baseIndex = eventDir==='東' ? 0 : 1;
+  const rows = [];
+  for(let i=-2;i<=8;i++){
+    const offset=i*30;
+    const dir=((baseIndex+i)%2+2)%2===0?'東':'西';
+    const cls=dir==='東'?'east':'west';
+    const atMs=eventTimestamp+offset*60000;
+    rows.push({offset,dir,cls,at:new Date(atMs),diff:(atMs-nowMs)/60000});
+  }
+  const current = rows.find(r => Math.abs(r.diff)<=0.5);
+  const next = current || rows.find(r => r.diff>0.5);
+  showNext(next,current);
+  $('#schedule').innerHTML = rows.map(r=>{
+    const state=Math.abs(r.diff)<=0.5?'now':r.diff<-.5?'past':'';
+    const label=r.offset===0?'基準時刻':r.offset>0?`+${r.offset}分`:`${r.offset}分`;
+    const sub=r.offset===0?'入力した発生時刻':'30分ごとの出現サイクル';
+    return `<div class="row ${state}"><div class="badge ${r.cls}">${r.dir}</div><div><strong>${label}</strong><div class="elapsed">${sub}</div></div><div class="at">${clock(r.at)}</div></div>`;
+  }).join('');
+  $('#results').classList.add('show');
+}
+function showNext(next,current){
+  if(next){
+    $('#nextDir').textContent=`${next.dir} に出現`;
+    $('#nextDir').className=`direction ${next.cls}`;
+    $('#nextTime').textContent=clock(next.at);
+    $('#nextDelta').textContent=current?'出現中（現在時刻基準）':deltaText(next.diff);
+    $('#nextCard').style.opacity='1';
+  }else{
+    $('#nextDir').textContent='表示範囲外';
+    $('#nextDir').className='direction';
+    $('#nextTime').textContent='--:--';
+    $('#nextDelta').textContent='もう一度計算してください';
+    $('#nextCard').style.opacity='.65';
+  }
+}
+function calculate(){
+  const rem=Number($('#remaining').value);
+  $('#error').textContent='';
+  if($('#remaining').value===''||!Number.isFinite(rem)||rem<0||rem>180){
+    $('#results').classList.remove('show');
+    $('#error').textContent='0〜180の範囲で残り時間を入力してください。';
+    return;
+  }
+  mode='remaining';
+  baseElapsedMinutes=180-rem;
+  baseTimestamp=Date.now();
+  createdTimestamp=baseTimestamp-baseElapsedMinutes*60000;
+  setTimer();
+}
+function calculateEvent(){
+  $('#error').textContent='';
+  const val=$('#eventTime').value;
+  if(!val||!eventDir){
+    $('#results').classList.remove('show');
+    $('#error').textContent='発生した時間を入力し、東か西を選んでください。';
+    return;
+  }
+  const [h,m]=val.split(':').map(Number);
+  const now=new Date();
+  const d=new Date(now);
+  d.setHours(h,m,0,0);
+  if(d.getTime()>now.getTime()+30000) d.setDate(d.getDate()-1);
+  eventTimestamp=d.getTime();
+  mode='event';
+  setTimer();
+}
+function selectDir(dir){
+  eventDir=dir;
+  $('#eventEast').classList.toggle('active',dir==='東');
+  $('#eventWest').classList.toggle('active',dir==='西');
+}
 $('#calc').addEventListener('click',calculate);
-$('#remaining').addEventListener('keydown',e=>{if(e.key==='Enter')calculate()});
+$('#remaining').addEventListener('keydown',e=>{if(e.key==='Enter')calculate();});
+$('#calcEvent').addEventListener('click',calculateEvent);
+$('#eventTime').addEventListener('keydown',e=>{if(e.key==='Enter')calculateEvent();});
+$('#eventEast').addEventListener('click',()=>selectDir('東'));
+$('#eventWest').addEventListener('click',()=>selectDir('西'));
 </script>
 </body>
 </html>
