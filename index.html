@@ -448,20 +448,20 @@ button:active{transform:translateY(1px)}
     </div>
   </section>
 
-  <p class="foot">出現サイクル：島作成10分後に東 → 30分後に西 → 30分後に東…を繰り返します。</p>
+  <p class="foot">出現サイクル：島作成20分後に東 → 30分後に西 → 30分後に東…を繰り返します。</p>
   <p class="foot">©SQUARE ENIX</p>
 </main>
 <script>
 const spawns = [
-  {elapsed:10, dir:'東', cls:'east'},
-  {elapsed:40, dir:'西', cls:'west'},
-  {elapsed:70, dir:'東', cls:'east'},
-  {elapsed:100, dir:'西', cls:'west'},
-  {elapsed:130, dir:'東', cls:'east'},
-  {elapsed:160, dir:'西', cls:'west'},
-  {elapsed:190, dir:'東', cls:'east'},
-  {elapsed:220, dir:'西', cls:'west'},
-  {elapsed:250, dir:'東', cls:'east'},
+  {elapsed:20, dir:'東', cls:'east'},
+  {elapsed:50, dir:'西', cls:'west'},
+  {elapsed:80, dir:'東', cls:'east'},
+  {elapsed:110, dir:'西', cls:'west'},
+  {elapsed:140, dir:'東', cls:'east'},
+  {elapsed:170, dir:'西', cls:'west'},
+  {elapsed:200, dir:'東', cls:'east'},
+  {elapsed:230, dir:'西', cls:'west'},
+  {elapsed:260, dir:'東', cls:'east'},
 ];
 const $ = s => document.querySelector(s);
 const pad = n => String(n).padStart(2,'0');
