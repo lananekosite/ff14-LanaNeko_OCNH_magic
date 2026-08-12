@@ -4,6 +4,23 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>クレセントアイル：北征編 マジックポット出現時間計算機</title>
+<meta name="description" content="FF14 クレセントアイル：北征編のマジックポット出現時間を簡単に計算できます。">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:site_name" content="クレセントアイル：北征編 マジックポット出現時間計算機">
+<meta property="og:title" content="クレセントアイル：北征編 マジックポット出現時間計算機">
+<meta property="og:description" content="FF14 クレセントアイル：北征編のマジックポット出現時間を簡単に計算できます。">
+<meta property="og:url" content="https://lananekosite.github.io/ff14-LanaNeko_OCNH_magic/">
+<meta property="og:image" content="https://lananekosite.github.io/ff14-LanaNeko_OCNH_magic/og-image.png">
+<meta property="og:image:secure_url" content="https://lananekosite.github.io/ff14-LanaNeko_OCNH_magic/og-image.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="クレセントアイル：北征編 マジックポット出現時間計算機">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="クレセントアイル：北征編 マジックポット出現時間計算機">
+<meta name="twitter:description" content="FF14 クレセントアイル：北征編のマジックポット出現時間を簡単に計算できます。">
+<meta name="twitter:image" content="https://lananekosite.github.io/ff14-LanaNeko_OCNH_magic/og-image.png">
 <style>
 :root{
   color-scheme: light;
@@ -321,10 +338,12 @@ button:active{transform:translateY(1px)}
   background:rgba(12,14,29,.48);
 }
 .alarm-copy{min-width:0;flex:1}
-.alarm-volume{margin-top:10px;display:flex;align-items:center;gap:10px;max-width:300px}
+.alarm-volume{margin-top:10px;display:flex;align-items:center;gap:10px;max-width:430px;flex-wrap:wrap}
 .alarm-volume label{font-size:11px;color:#d7cee5;white-space:nowrap}
-.alarm-volume input[type="range"]{width:100%;accent-color:#5f7fa8;cursor:pointer}
+.alarm-volume input[type="range"]{flex:1 1 150px;min-width:120px;accent-color:#5f7fa8;cursor:pointer}
 .alarm-volume-value{font-size:11px;color:#526f93;min-width:34px;text-align:right;font-variant-numeric:tabular-nums}
+.alarm-preview{height:34px;padding:0 14px;border-radius:10px;font-size:11px;white-space:nowrap;box-shadow:none;background:linear-gradient(135deg,#7895b7,#5f7fa8);color:#fff}
+.alarm-preview:hover{box-shadow:none;transform:translateY(-1px)}
 .alarm-title{font-size:13px;font-weight:900;color:#f2ebfb;margin-bottom:3px}
 .alarm-sub{font-size:11px;color:var(--muted);line-height:1.5}
 .alarm-toggle{
@@ -578,8 +597,9 @@ button:active{transform:translateY(1px)}
           <div id="alarmStatus" class="alarm-status">アラーム：OFF</div>
           <div class="alarm-volume">
             <label for="alarmVolume">音量</label>
-            <input id="alarmVolume" type="range" min="0" max="100" value="70" step="1" aria-label="アラーム音量">
-            <span id="alarmVolumeValue" class="alarm-volume-value">70%</span>
+            <input id="alarmVolume" type="range" min="0" max="100" value="25" step="1" aria-label="アラーム音量">
+            <span id="alarmVolumeValue" class="alarm-volume-value">25%</span>
+            <button id="alarmPreview" class="alarm-preview" type="button">SEを試聴</button>
           </div>
         </div>
         <button id="alarmToggle" class="alarm-toggle" type="button" role="switch" aria-checked="false" aria-label="出現5分前アラーム">
@@ -619,7 +639,14 @@ let createdTimestamp = null;
 let eventTimestamp = null;
 let eventDir = null;
 let alarmEnabled = false;
-let alarmVolume = 0.7;
+let alarmVolume = 0.25;
+try{
+  const savedVolume=localStorage.getItem('magicpotAlarmVolume');
+  if(savedVolume!==null){
+    const parsed=Number(savedVolume);
+    if(Number.isFinite(parsed) && parsed>=0 && parsed<=1) alarmVolume=parsed;
+  }
+}catch(e){}
 let lastAlarmCheck = Date.now();
 const alarmedAt = new Set();
 
@@ -701,6 +728,19 @@ function playAlarm(){
     const p=audio.play();
     if(p && typeof p.catch==='function') p.catch(()=>{
       $('#alarmStatus').textContent='アラーム：ON（ブラウザで音声再生が許可されていません）';
+    });
+  }catch(e){}
+}
+
+function previewAlarm(){
+  const audio=$('#alarmAudio');
+  try{
+    audio.pause();
+    audio.currentTime=0;
+    audio.volume=alarmVolume;
+    const p=audio.play();
+    if(p && typeof p.catch==='function') p.catch(()=>{
+      $('#alarmStatus').textContent='試聴できませんでした。ブラウザの音声再生許可を確認してください。';
     });
   }catch(e){}
 }
@@ -814,11 +854,15 @@ $('#eventTime').addEventListener('keydown',e=>{if(e.key==='Enter')calculateEvent
 $('#eventEast').addEventListener('click',()=>selectDir('東'));
 $('#eventWest').addEventListener('click',()=>selectDir('西'));
 $('#alarmToggle').addEventListener('click',toggleAlarm);
+$('#alarmPreview').addEventListener('click',previewAlarm);
 $('#alarmVolume').addEventListener('input',e=>{
   alarmVolume=Number(e.target.value)/100;
   $('#alarmVolumeValue').textContent=`${e.target.value}%`;
   $('#alarmAudio').volume=alarmVolume;
+  try{localStorage.setItem('magicpotAlarmVolume',String(alarmVolume));}catch(err){}
 });
+$('#alarmVolume').value=String(Math.round(alarmVolume*100));
+$('#alarmVolumeValue').textContent=`${Math.round(alarmVolume*100)}%`;
 $('#alarmAudio').volume=alarmVolume;
 </script>
 </body>
