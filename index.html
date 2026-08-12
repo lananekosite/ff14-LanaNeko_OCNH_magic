@@ -6,20 +6,20 @@
 <title>クレセントアイル：北征編 マジックポット出現時間計算機</title>
 <style>
 :root{
-  color-scheme: dark;
-  --bg:#0f1020;
+  color-scheme: light;
+  --bg:#e6e6fa;
   --panel:rgba(28,27,52,.78);
   --panel2:rgba(48,43,78,.72);
-  --text:#fff9ff;
-  --muted:#c9c1da;
+  --text:#29243d;
+  --muted:#57516d;
   --east:#75ddff;
   --east-soft:#b9f0ff;
   --west:#ffc48d;
   --west-soft:#ffe1bf;
-  --accent:#e9a8ff;
-  --accent2:#9fc4ff;
-  --accent3:#ffd7f1;
-  --danger:#ff9aa7;
+  --accent:#5f7fa8;
+  --accent2:#8fb0cf;
+  --accent3:#c8d8e8;
+  --danger:#9b3f52;
   --line:rgba(255,255,255,.10);
   --shadow:0 24px 70px rgba(4,4,18,.45);
 }
@@ -31,11 +31,7 @@ body{
   font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif;
   min-height:100vh;
   overflow-x:hidden;
-  background:
-    radial-gradient(circle at 15% 5%, rgba(174,139,255,.24), transparent 32%),
-    radial-gradient(circle at 88% 18%, rgba(93,198,255,.17), transparent 27%),
-    radial-gradient(circle at 50% 100%, rgba(255,154,210,.12), transparent 34%),
-    linear-gradient(180deg,#15142d 0%,#101224 46%,#0b0d18 100%);
+  background:#e6e6fa;
 }
 body::before,
 body::after{
@@ -46,11 +42,11 @@ body::after{
   z-index:0;
 }
 body::before{
-  opacity:.48;
+  opacity:.18;
   background-image:
-    radial-gradient(circle,rgba(255,255,255,.8) 0 1px,transparent 1.5px),
-    radial-gradient(circle,rgba(255,255,255,.5) 0 1px,transparent 1.5px),
-    radial-gradient(circle,rgba(255,255,255,.38) 0 1px,transparent 1.5px);
+    radial-gradient(circle,rgba(73,61,105,.65) 0 1px,transparent 1.5px),
+    radial-gradient(circle,rgba(73,61,105,.45) 0 1px,transparent 1.5px),
+    radial-gradient(circle,rgba(73,61,105,.32) 0 1px,transparent 1.5px);
   background-size:120px 120px,190px 190px,260px 260px;
   background-position:18px 22px,82px 116px,140px 42px;
   mask-image:linear-gradient(to bottom,#000 0%,rgba(0,0,0,.55) 46%,transparent 88%);
@@ -73,11 +69,12 @@ main{
   padding:48px 0 52px;
 }
 .hero{
-  text-align:center;
+  text-align:left;
   margin-bottom:26px;
   position:relative;
 }
 .hero-mark{
+  display:none;
   width:54px;
   height:54px;
   margin:0 auto 14px;
@@ -87,20 +84,23 @@ main{
   color:#2c2040;
   font-size:24px;
   font-weight:900;
-  background:linear-gradient(145deg,#fff8d8,#ffc8f1 52%,#b6cfff);
-  box-shadow:0 0 0 5px rgba(255,255,255,.05),0 8px 30px rgba(216,165,255,.25);
+  background:linear-gradient(145deg,#f5f8fc,#c8d8e8 52%,#9fb7d2);
+  box-shadow:0 0 0 5px rgba(255,255,255,.05),0 8px 30px rgba(73,105,143,.22);
 }
 h1{
-  font-size:clamp(24px,5vw,36px);
-  letter-spacing:.02em;
-  line-height:1.3;
+  font-family:"Yu Mincho","Hiragino Mincho ProN","Hiragino Mincho Pro","Noto Serif JP",serif;
+  font-size:clamp(18px,3.2vw,25px);
+  font-weight:600;
+  letter-spacing:.045em;
+  line-height:1.45;
   margin:0 0 10px;
-  text-shadow:0 2px 18px rgba(218,181,255,.20);
+  color:#312947;
+  text-shadow:none;
 }
 .lead{
   max-width:700px;
   color:var(--muted);
-  margin:0 auto;
+  margin:0;
   line-height:1.85;
   font-size:14px;
 }
@@ -123,7 +123,7 @@ h1{
   border-radius:50%;
   right:-110px;
   top:-135px;
-  background:radial-gradient(circle,rgba(236,164,255,.22),transparent 68%);
+  background:radial-gradient(circle,rgba(143,176,207,.24),transparent 68%);
   pointer-events:none;
 }
 .input-row{
@@ -158,8 +158,8 @@ h1{
 }
 .remaining-wrap input::placeholder{color:#76728b}
 .remaining-wrap input:focus{
-  border-color:rgba(224,166,255,.75);
-  box-shadow:0 0 0 4px rgba(222,166,255,.11),inset 0 1px 10px rgba(0,0,0,.16);
+  border-color:rgba(95,127,168,.88);
+  box-shadow:0 0 0 4px rgba(95,127,168,.16),inset 0 1px 10px rgba(0,0,0,.16);
   background:rgba(10,12,28,.78);
 }
 .suffix{
@@ -175,16 +175,16 @@ button{
   border:0;
   border-radius:17px;
   padding:0 24px;
-  background:linear-gradient(135deg,#ffc7ee 0%,#d9afff 46%,#a5c7ff 100%);
-  color:#291f3a;
+  background:linear-gradient(135deg,#6f8fb5 0%,#5f7fa8 52%,#48698f 100%);
+  color:#f8fbff;
   font-size:15px;
   font-weight:900;
   letter-spacing:.03em;
   cursor:pointer;
-  box-shadow:0 10px 24px rgba(193,148,255,.22),inset 0 1px 0 rgba(255,255,255,.6);
+  box-shadow:0 10px 24px rgba(60,86,118,.25),inset 0 1px 0 rgba(255,255,255,.32);
   transition:transform .15s ease,filter .15s ease,box-shadow .15s ease;
 }
-button:hover{filter:brightness(1.05);transform:translateY(-1px);box-shadow:0 13px 28px rgba(193,148,255,.27),inset 0 1px 0 rgba(255,255,255,.7)}
+button:hover{filter:brightness(1.06);transform:translateY(-1px);box-shadow:0 13px 28px rgba(60,86,118,.30),inset 0 1px 0 rgba(255,255,255,.36)}
 button:active{transform:translateY(1px)}
 .alt-divider{
   display:flex;
@@ -218,8 +218,8 @@ button:active{transform:translateY(1px)}
   color-scheme:dark;
 }
 .time-input:focus{
-  border-color:rgba(224,166,255,.75);
-  box-shadow:0 0 0 4px rgba(222,166,255,.11);
+  border-color:rgba(95,127,168,.88);
+  box-shadow:0 0 0 4px rgba(95,127,168,.16);
   background:rgba(10,12,28,.78);
 }
 .dir-toggle{display:flex;gap:8px;height:60px}
@@ -262,17 +262,17 @@ button:active{transform:translateY(1px)}
 .next{
   position:relative;
   overflow:hidden;
-  border:2px solid rgba(238,190,255,.82);
+  border:2px solid #7895b7;
   background:
     radial-gradient(circle at 88% 18%,rgba(151,211,255,.22),transparent 34%),
-    radial-gradient(circle at 12% 85%,rgba(255,176,230,.16),transparent 38%),
-    linear-gradient(135deg,rgba(76,55,112,.94),rgba(31,38,72,.94));
+    radial-gradient(circle at 12% 85%,rgba(176,201,225,.18),transparent 38%),
+    linear-gradient(135deg,rgba(54,76,105,.97),rgba(31,45,63,.97));
   border-radius:22px;
   padding:20px;
   margin-bottom:16px;
   box-shadow:
-    0 0 0 4px rgba(223,166,255,.10),
-    0 0 28px rgba(202,157,255,.24),
+    0 0 0 4px rgba(120,149,183,.15),
+    0 0 28px rgba(95,127,168,.28),
     0 14px 34px rgba(5,5,20,.28),
     inset 0 1px 0 rgba(255,255,255,.18);
 }
@@ -281,9 +281,9 @@ button:active{transform:translateY(1px)}
   position:absolute;
   right:16px;
   top:10px;
-  color:rgba(255,232,255,.48);
+  color:rgba(226,237,248,.62);
   font-size:30px;
-  text-shadow:0 0 16px rgba(230,185,255,.55);
+  text-shadow:0 0 16px rgba(143,176,207,.48);
 }
 .next::after{
   content:"";
@@ -297,7 +297,7 @@ button:active{transform:translateY(1px)}
   font-size:12px;
   font-weight:800;
   letter-spacing:.08em;
-  color:#cfc6de;
+  color:#dce8f4;
   margin-bottom:9px;
 }
 .next-main{display:flex;align-items:center;justify-content:space-between;gap:14px}
@@ -306,7 +306,8 @@ button:active{transform:translateY(1px)}
 .direction.west{color:var(--west-soft);text-shadow:0 0 20px rgba(255,196,141,.20)}
 .clock{text-align:right;min-width:110px}
 .clock .time{font-size:32px;font-weight:950;letter-spacing:.03em;font-variant-numeric:tabular-nums}
-.clock .delta{font-size:12px;color:var(--muted);margin-top:3px}
+.clock .delta{font-size:12px;color:#d9e6f2;margin-top:3px}
+.clock .time{color:#ffffff;text-shadow:0 1px 10px rgba(0,0,0,.22)}
 
 .alarm-panel{
   display:flex;
@@ -322,8 +323,8 @@ button:active{transform:translateY(1px)}
 .alarm-copy{min-width:0;flex:1}
 .alarm-volume{margin-top:10px;display:flex;align-items:center;gap:10px;max-width:300px}
 .alarm-volume label{font-size:11px;color:#d7cee5;white-space:nowrap}
-.alarm-volume input[type="range"]{width:100%;accent-color:#d8b0ff;cursor:pointer}
-.alarm-volume-value{font-size:11px;color:#eec4ff;min-width:34px;text-align:right;font-variant-numeric:tabular-nums}
+.alarm-volume input[type="range"]{width:100%;accent-color:#5f7fa8;cursor:pointer}
+.alarm-volume-value{font-size:11px;color:#526f93;min-width:34px;text-align:right;font-variant-numeric:tabular-nums}
 .alarm-title{font-size:13px;font-weight:900;color:#f2ebfb;margin-bottom:3px}
 .alarm-sub{font-size:11px;color:var(--muted);line-height:1.5}
 .alarm-toggle{
@@ -357,15 +358,15 @@ button:active{transform:translateY(1px)}
 }
 .alarm-toggle.on{
   justify-content:flex-start;
-  color:#2b203a;
-  background:linear-gradient(135deg,#ffc7ee,#d8b0ff 48%,#a6c8ff);
+  color:#ffffff;
+  background:linear-gradient(135deg,#8fa9c5,#6f8fb5 50%,#526f93);
   border-color:transparent;
 }
 .alarm-toggle.on::before{left:53px;background:#fff}
 .alarm-toggle .off-label,.alarm-toggle.on .on-label{display:inline}
 .alarm-toggle .on-label,.alarm-toggle.on .off-label{display:none}
 .alarm-status{margin-top:4px;font-size:10px;color:#bdb4cc}
-.alarm-status.active{color:#eec4ff}
+.alarm-status.active{color:#3e5f86}
 
 .schedule-title{
   display:flex;
@@ -381,7 +382,7 @@ button:active{transform:translateY(1px)}
   height:16px;
   border-radius:999px;
   background:linear-gradient(var(--accent3),var(--accent2));
-  box-shadow:0 0 12px rgba(228,172,255,.28);
+  box-shadow:0 0 12px rgba(95,127,168,.28);
 }
 .schedule{display:grid;gap:9px}
 .row{
@@ -413,11 +414,11 @@ button:active{transform:translateY(1px)}
 .row .at{font-weight:900;font-size:16px;font-variant-numeric:tabular-nums}
 .past{opacity:.38;filter:saturate(.75)}
 .now{
-  border-color:rgba(234,170,255,.72);
-  box-shadow:inset 0 0 0 1px rgba(234,170,255,.3),0 0 22px rgba(221,163,255,.08);
-  background:linear-gradient(135deg,rgba(71,51,92,.52),rgba(29,31,54,.70));
+  border-color:rgba(95,127,168,.82);
+  box-shadow:inset 0 0 0 1px rgba(95,127,168,.28),0 0 22px rgba(95,127,168,.12);
+  background:linear-gradient(135deg,rgba(114,143,177,.38),rgba(255,255,255,.48));
 }
-.now .at::after{content:"  出現中";color:#f3c3ff;font-size:10px}
+.now .at::after{content:"  出現中";color:#3e5f86;font-size:10px}
 .legend{
   display:flex;
   gap:14px;
@@ -465,6 +466,59 @@ button:active{transform:translateY(1px)}
   .clock{text-align:left}
   .summary{grid-template-columns:1fr}
 }
+
+/* 2026-08-12 design adjustments */
+.hero h1{
+  text-align:center;
+  width:100%;
+}
+.card{
+  background:#b0c4de;
+  border:2px solid #879fbd;
+  color:#1f2d3d;
+  box-shadow:0 20px 55px rgba(61,78,102,.22),inset 0 1px 0 rgba(255,255,255,.65);
+}
+.card::before{
+  background:radial-gradient(circle,rgba(255,255,255,.42),transparent 68%);
+}
+.card .field label,
+.card .alarm-title,
+.card .schedule-title{color:#1f2d3d;}
+.card .note,
+.card .summary small,
+.card .clock .delta,
+.card .alarm-sub,
+.card .alarm-status,
+.card .row .elapsed,
+.card .legend,
+.card .alt-divider{color:#43556d;}
+.card .alt-divider::before,
+.card .alt-divider::after{background:rgba(42,59,82,.22);}
+.card .summary>div{
+  background:rgba(255,255,255,.42);
+  border-color:rgba(54,76,105,.18);
+  color:#1f2d3d;
+}
+.card .alarm-panel{
+  background:rgba(255,255,255,.34);
+  border-color:rgba(54,76,105,.18);
+}
+.card .alarm-volume label{color:#34475f;}
+.card .alarm-volume-value{color:#34475f;}
+.card .row{
+  background:rgba(255,255,255,.38);
+  border-color:rgba(54,76,105,.17);
+  color:#1f2d3d;
+}
+.card .row:not(.past):hover{background:rgba(255,255,255,.55);}
+.card .badge{background:rgba(255,255,255,.45);}
+
+/* 2026-08-12 palette refinement: remove pink accents and improve next-spawn contrast */
+.card .next .clock .time{color:#ffffff;}
+.card .next .clock .delta{color:#d9e6f2;}
+.card .next .next-label{color:#dce8f4;}
+.card .next{border-color:#7895b7;}
+
 </style>
 </head>
 <body>
@@ -481,7 +535,7 @@ button:active{transform:translateY(1px)}
         <label for="remaining">一番短い残り時間</label>
         <div class="remaining-wrap"><input id="remaining" type="number" min="0" max="180" step="1" inputmode="numeric" placeholder="例：160"><span class="suffix">分</span></div>
       </div>
-      <button id="calc">計算する</button>
+      <button id="calc">計算</button>
     </div>
     <div class="note">入力した瞬間を基準時刻として計算します。コンテンツ時間は180分です。</div>
 
@@ -498,7 +552,7 @@ button:active{transform:translateY(1px)}
           <button type="button" id="eventWest" class="dir-btn west">西</button>
         </div>
       </div>
-      <button id="calcEvent" type="button">計算する</button>
+      <button id="calcEvent" type="button">計算</button>
     </div>
     <div class="note event-note">発生時刻から計算する場合は、そのF.A.T.E.を基準に30分ごとの東西サイクルを表示します。</div>
     <div id="error" class="error"></div>
